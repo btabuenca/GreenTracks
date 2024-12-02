@@ -4,6 +4,7 @@ import 'package:madtrack/screens/home/routes_screen.dart';
 import 'package:madtrack/screens/home/welcome_sreen.dart';
 import 'package:madtrack/screens/home/report_screen.dart';
 import 'package:madtrack/screens/home/settings_screen.dart';
+import 'package:madtrack/screens/home/weather_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const RoutesScreen(),
     const ReportScreen(),
     const AccountScreen(),
+    const WeatherScreen(), // Nueva pantalla
   ];
 
   @override
@@ -79,6 +81,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(Icons.person),
                   selectedIcon: Icon(Icons.person_outline),
                   label: Text('Cuenta'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.cloud),
+                  selectedIcon: Icon(Icons.cloud_outlined),
+                  label: Text('Clima'), // Nueva entrada
                 ),
               ],
             ),
