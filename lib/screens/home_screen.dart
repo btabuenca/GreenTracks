@@ -4,7 +4,6 @@ import 'package:madtrack/screens/home/routes_screen.dart';
 import 'package:madtrack/screens/home/welcome_sreen.dart';
 import 'package:madtrack/screens/home/report_screen.dart';
 import 'package:madtrack/screens/home/settings_screen.dart';
-//import 'package:madtrack/widgets/my_app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,6 +14,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  bool _isRailVisible = true; // Controla la visibilidad del NavigationRail
+
   final List<Widget> _pages = [
     const WelcomeScreen(),
     const RoutesScreen(),
@@ -26,52 +27,71 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('MADTrack'),
+        title: const Text('GreenTracks'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // Navega a la pantalla de configuración
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
           ),
+          IconButton(
+            icon: Icon(_isRailVisible ? Icons.visibility_off : Icons.visibility),
+            onPressed: () {
+              setState(() {
+                _isRailVisible = !_isRailVisible; // Alterna la visibilidad
+              });
+            },
+          ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: _pages,
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        useLegacyColorScheme: false,
-        showUnselectedLabels: false,
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.route),
-            label: 'Rutas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.report),
-            label: 'Reportes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Cuenta',
+      body: Row(
+        children: [
+          if (_isRailVisible) // Muestra el NavigationRail solo si _isRailVisible es true
+            NavigationRail(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+              labelType: NavigationRailLabelType.selected,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home),
+                  selectedIcon: Icon(Icons.home_filled),
+                  label: Text('Inicio'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.route),
+                  selectedIcon: Icon(Icons.route_outlined),
+                  label: Text('Rutas'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.report),
+                  selectedIcon: Icon(Icons.report_gmailerrorred),
+                  label: Text('Reportes'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.person),
+                  selectedIcon: Icon(Icons.person_outline),
+                  label: Text('Cuenta'),
+                ),
+              ],
+            ),
+          if (_isRailVisible)
+            const VerticalDivider(thickness: 1, width: 1), // Divider opcional
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: _pages,
+              ),
+            ),
           ),
         ],
       ),

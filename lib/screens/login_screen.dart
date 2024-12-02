@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:madtrack/models/auth_result.dart';
-import 'package:madtrack/models/data_manager.dart';
 import 'package:madtrack/controllers/auth_manager.dart';
 import 'package:madtrack/screens/home_screen.dart';
 import 'package:madtrack/screens/register_screen.dart';
@@ -80,20 +79,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         _circleLoading = false;
                       });
                       if (result.success) {
-                        // ignore: use_build_context_synchronously
                         Navigator.pushReplacement(
                           context,
                           SlideTransitionClass(
                               page: const HomeScreen(), direction: 'left'),
                         );
-                        DataManager().updateData();
+                        // btb DataManager().updateData();
                       } else {
                         final snackBar = SnackBar(
                           content: Text(
                               'Error en el inicio de sesión: ${result.errorMessage}'),
                           duration: const Duration(seconds: 2),
                         );
-                        // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
                     }

@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+//import 'package:firebase_database/firebase_database.dart';
 import 'package:madtrack/models/auth_result.dart';
 
 class AuthManager {
@@ -14,10 +14,10 @@ class AuthManager {
         password: password,
       );
      await userCredential.user?.updateDisplayName(username);
-      DatabaseReference userRef = FirebaseDatabase.instance
-          .ref()
-          .child('Users/${userCredential.user?.uid}');
-      await userRef.set({'username': username});
+      // DatabaseReference userRef = FirebaseDatabase.instance
+      //    .ref()
+      //    .child('Users/${userCredential.user?.uid}');
+      // await userRef.set({'username': username});
       return AuthResult(success: true);
     } on FirebaseAuthException catch (e) {
       String errorMessage = '';

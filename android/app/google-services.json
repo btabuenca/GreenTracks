@@ -1,8 +1,9 @@
 {
   "project_info": {
     "project_number": "759108045415",
+    "firebase_url": "https://madtrack-effa7-default-rtdb.firebaseio.com",
     "project_id": "madtrack-effa7",
-    "storage_bucket": "madtrack-effa7.appspot.com"
+    "storage_bucket": "madtrack-effa7.firebasestorage.app"
   },
   "client": [
     {
@@ -12,7 +13,12 @@
           "package_name": "com.example.madtrack"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "759108045415-vi0imhoqekj7hg21q44n86mliu1sia7k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD_cgx9qyzPGM4KsTl56ZgAzKXX3m2lWWs"
@@ -20,7 +26,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "759108045415-vi0imhoqekj7hg21q44n86mliu1sia7k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "759108045415-r0cpo98mr4pfubjlrobrb4jltflqsmnq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "es.upm.btb.madtrack"
+              }
+            }
+          ]
         }
       }
     }

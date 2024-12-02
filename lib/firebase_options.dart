@@ -48,7 +48,8 @@ class DefaultFirebaseOptions {
     appId: '1:759108045415:android:793db0daf18cdd69ce22c2',
     messagingSenderId: '759108045415',
     projectId: 'madtrack-effa7',
-    storageBucket: 'madtrack-effa7.appspot.com',
+    databaseURL: 'https://madtrack-effa7-default-rtdb.firebaseio.com',
+    storageBucket: 'madtrack-effa7.firebasestorage.app',
   );
 
   static const FirebaseOptions web = FirebaseOptions(

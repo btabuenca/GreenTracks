@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:madtrack/widgets/routes_summary.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:madtrack/controllers/database_controller.dart';
 import 'package:madtrack/controllers/sensors_controller.dart';
-import 'package:madtrack/models/data_manager.dart';
 import 'package:madtrack/models/sensors_data.dart';
 import 'package:madtrack/screens/home/map_screen.dart';
 import 'package:madtrack/widgets/save_route.dart';
@@ -93,7 +90,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           const SizedBox(height: 60.0),
           const WeatherForecastWidget(),
           const SizedBox(height: 60.0),
-          const RoutesSummary(),
           const SizedBox(height: 20),
         ],
       ),
@@ -143,18 +139,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     } else {
       SensorsData sensorsData = sensorController.stopTracking();
       sensorsData.calculateData();
-      showDialog(
+/*      showDialog(
         context: context,
         builder: (BuildContext context) {
           return SaveRoute(
             onSave: (name) async {
               sensorsData.name = name;
-              await DatabaseController().addData(sensorsData);
-              DataManager().updateData();
+              // btb await DatabaseController().addData(sensorsData);
+              // btb DataManager().updateData();
             },
           );
         },
-      );
+      );*/
     }
   }
 }

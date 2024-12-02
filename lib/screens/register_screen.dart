@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:madtrack/models/auth_result.dart';
-import 'package:madtrack/models/data_manager.dart';
 import 'package:madtrack/controllers/auth_manager.dart';
 import 'package:madtrack/screens/home_screen.dart';
 import 'package:madtrack/widgets/my_app_bar.dart';
@@ -100,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           SlideTransitionClass(
                               page: const HomeScreen(), direction: 'left'),
                         );
-                        DataManager().updateData();
+                        // btb DataManager().updateData();
                       } else {
                         final snackBar = SnackBar(
                           content: Text(

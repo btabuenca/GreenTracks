@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'material-theme/color_schemes.g.dart';
-import 'models/data_manager.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,7 +14,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await DataManager().initializeData();
+  // btb await DataManager().initializeData();
   runApp(const MyApp());
 }
 
