@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "759108045415",
+    "project_id": "madtrack-effa7",
+    "storage_bucket": "madtrack-effa7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:759108045415:android:793db0daf18cdd69ce22c2",
+        "android_client_info": {
+          "package_name": "com.example.madtrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_cgx9qyzPGM4KsTl56ZgAzKXX3m2lWWs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
