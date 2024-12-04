@@ -15,6 +15,7 @@ class ReportScreen extends StatefulWidget {
 class _ReportScreenState extends State<ReportScreen> {
   Position? _currentPosition;
   final TextEditingController _reportController = TextEditingController();
+  final TextEditingController _routeController = TextEditingController();
   late GoogleMapController _mapController;
   Set<Marker> _markers = {};
   bool _mapInitialized = false; // Para asegurarnos de que el mapa se centra solo una vez
@@ -70,26 +71,49 @@ class _ReportScreenState extends State<ReportScreen> {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final data = json.decode(response.body);
 
-        Set<Marker> newMarkers = data.map((report) {
-          // Parsear la fecha del reporte y formatearla
-          DateTime timestamp = DateTime.parse(report['timestamp_server']);
-          String formattedDate = DateFormat('dd/MM/yyyy HH:mm:ss').format(timestamp);
+        if (data is List) {
+          Set<Marker> newMarkers = {};
 
-          return Marker(
-            markerId: MarkerId(report['timestamp_server']),
-            position: LatLng(report['latitude'], report['longitude']),
-            infoWindow: InfoWindow(
-              title: report['dataset']['metadata'],
-              snippet: formattedDate, // Usa la fecha formateada aquí
-            ),
-          );
-        }).toSet();
+          for (var report in data) {
+            if (report is Map<String, dynamic>) {
+              final timestamp = report['timestamp_server'];
+              final latitude = report['latitude'];
+              final longitude = report['longitude'];
+              final dataset = report['dataset'];
 
-        setState(() {
-          _markers = newMarkers;
-        });
+              // Validar y manejar datos
+              if (timestamp is String &&
+                  latitude is double &&
+                  longitude is double) {
+                String infoTitle = 'Sin título';
+                String infoSnippet = 'Sin descripción';
+
+                if (dataset != null && dataset is Map<String, dynamic>) {
+                  infoTitle = dataset['metadata']?.toString() ?? infoTitle;
+                }
+
+                newMarkers.add(
+                  Marker(
+                    markerId: MarkerId(timestamp + latitude.toString() + longitude.toString()),
+                    position: LatLng(latitude, longitude),
+                    infoWindow: InfoWindow(
+                      title: infoTitle,
+                      snippet: infoSnippet,
+                    ),
+                  ),
+                );
+              }
+            }
+          }
+
+          setState(() {
+            _markers = newMarkers;
+          });
+        } else {
+          throw Exception('La respuesta no contiene una lista válida.');
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al cargar reportes: ${response.statusCode}')),
@@ -103,6 +127,7 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
 
+
   // Método para enviar un nuevo reporte
   Future<void> _submitReport() async {
     if (_reportController.text.isNotEmpty && _currentPosition != null) {
@@ -110,6 +135,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
       Map<String, dynamic> reportData = {
         "id_device": 1,
+        "route": _routeController.text,
         "latitude": _currentPosition?.latitude,
         "longitude": _currentPosition?.longitude,
         "altitude": _currentPosition?.altitude,
@@ -196,21 +222,31 @@ class _ReportScreenState extends State<ReportScreen> {
                 _currentPosition == null
                     ? const CircularProgressIndicator()
                     : Text(
-                    'Tus coordenadas: \nLat: ${_currentPosition?.latitude}, Lon: ${_currentPosition?.longitude} Alt: ${_currentPosition?.altitude}'),
+                    'Your position Lat: ${_currentPosition?.latitude}, Lon: ${_currentPosition?.longitude}, Alt: ${_currentPosition?.altitude}'),
                 const SizedBox(height: 20),
                 TextField(
                   controller: _reportController,
-                  maxLines: 4,
+                  maxLines: 2,
                   textAlignVertical: TextAlignVertical.top, // Alineación en la parte superior
                   decoration: const InputDecoration(
-                    labelText: 'Introduce una observación sobre tu localización actual',
+                    labelText: 'Introduce an observation on your current location',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _routeController,
+                  maxLines: 1,
+                  textAlignVertical: TextAlignVertical.top, // Alineación en la parte superior
+                  decoration: const InputDecoration(
+                    labelText: 'Route name (Optional)',
                     border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _submitReport,
-                  child: const Text('Introducir en el mapa'),
+                  child: const Text('Save Spot'),
                 ),
               ],
             ),

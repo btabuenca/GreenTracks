@@ -14,14 +14,14 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 
-class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key});
+class TrackingScreen extends StatefulWidget {
+  const TrackingScreen({super.key});
 
   @override
-  State<AccountScreen> createState() => _AccountScreenState();
+  State<TrackingScreen> createState() => _TrackingScreenState();
 }
 
-class _AccountScreenState extends State<AccountScreen> {
+class _TrackingScreenState extends State<TrackingScreen> {
   User? currentUser = AuthManager().getCurrentUser();
   bool getLux = true;
   bool getNoise = true;
@@ -88,32 +88,34 @@ class _AccountScreenState extends State<AccountScreen> {
 
     // Formateamos el JSON de acuerdo al formato requerido
     final postData = {
-      "n": "MadTrack",
-      "id": "1",
-      "meta": {"ver": "3.0"},
-      "cols": [
-        {"name": "timestamp", "meta": {"tz": "UTC"}},
-        {"name": "noise", "unit": "dB"},
-        {"name": "light", "unit": "lux"},
-        {"name": "latitude", "unit": "deg"},
-        {"name": "longitude", "unit": "deg"},
-        {"name": "altitude", "unit": "m"}
-      ],
-      "rows": data.map((record) {
-        return {
-          "timestamp": record["timestamp"],
-          "noise": record["decibel"],
-          "light": record["lux"],
-          "latitude": record["latitude"],
-          "longitude": record["longitude"],
-          "altitude": record["altitude"]
-        };
-      }).toList(),
+//      "body": {
+        "n": "MadTrack",
+        "id": "1",
+        "meta": {"ver": "3.0"},
+        "cols": [
+          {"name": "timestamp", "meta": {"tz": "UTC"}},
+          {"name": "noise", "unit": "dB"},
+          {"name": "light", "unit": "lux"},
+          {"name": "latitude", "unit": "deg"},
+          {"name": "longitude", "unit": "deg"},
+          {"name": "altitude", "unit": "m"}
+        ],
+        "rows": data.map((record) {
+          return {
+            "timestamp": record["timestamp"],
+            "noise": record["decibel"],
+            "light": record["lux"],
+            "latitude": record["latitude"],
+            "longitude": record["longitude"],
+            "altitude": record["altitude"]
+          };
+        }).toList(),
+//      }
     };
 
     // Enviamos el JSON a la API RESTful
     final response = await http.post(
-      Uri.parse("https://flow.iot.etsisi.upm.es/sutee/telemetry"),
+      Uri.parse("https://flow.iot.etsisi.upm.es/sutee/telemetries"),
       headers: {"Content-Type": "application/json"},
       body: json.encode(postData),
     );
@@ -128,6 +130,7 @@ class _AccountScreenState extends State<AccountScreen> {
       );
     }
   }
+
 
   final MaterialStateProperty<Icon?> thumbIcon =
   MaterialStateProperty.resolveWith<Icon?>(
@@ -307,7 +310,7 @@ class _AccountScreenState extends State<AccountScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Registrar luz (lumenes/luxures)',
+                'Light (Lux)',
                 style: TextStyle(fontSize: 18),
               ),
               Switch(
@@ -327,7 +330,7 @@ class _AccountScreenState extends State<AccountScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Registrar ruido (decibelios)',
+                'Noise (Decibels)',
                 style: TextStyle(fontSize: 18),
               ),
               Switch(
@@ -346,7 +349,7 @@ class _AccountScreenState extends State<AccountScreen> {
           Center(
             child: ElevatedButton(
               onPressed: _isTracking ? _stopTracking : _startTracking,
-              child: Text(_isTracking ? 'Detener Lectura' : 'Iniciar Lectura'),
+              child: Text(_isTracking ? 'Start tracking' : 'Stop tracking'),
             ),
           ),
           const SizedBox(height: 20),

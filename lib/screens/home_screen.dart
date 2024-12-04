@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:madtrack/screens/home/account_screen.dart';
+import 'package:madtrack/screens/home/tracking_screen.dart';
 import 'package:madtrack/screens/home/routes_screen.dart';
 import 'package:madtrack/screens/home/welcome_sreen.dart';
 import 'package:madtrack/screens/home/report_screen.dart';
 import 'package:madtrack/screens/home/settings_screen.dart';
 import 'package:madtrack/screens/home/weather_screen.dart';
+import 'package:madtrack/screens/public_transport_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,15 +22,16 @@ class _HomeScreenState extends State<HomeScreen> {
     const WelcomeScreen(),
     const RoutesScreen(),
     const ReportScreen(),
-    const AccountScreen(),
-    const WeatherScreen(), // Nueva pantalla
+    const TrackingScreen(),
+    const WeatherScreen(),
+    const PublicTransportScreen(), // Nueva pantalla
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('GreenTracks'),
+        title: const Text('GreenTracks!'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -65,27 +67,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 NavigationRailDestination(
                   icon: Icon(Icons.home),
                   selectedIcon: Icon(Icons.home_filled),
-                  label: Text('Inicio'),
+                  label: Text('Home'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.route),
                   selectedIcon: Icon(Icons.route_outlined),
-                  label: Text('Rutas'),
+                  label: Text('Routes'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.report),
-                  selectedIcon: Icon(Icons.report_gmailerrorred),
-                  label: Text('Reportes'),
+                  icon: Icon(Icons.location_city),
+                  selectedIcon: Icon(Icons.location_city_outlined),
+                  label: Text('Spots'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.person),
-                  selectedIcon: Icon(Icons.person_outline),
-                  label: Text('Cuenta'),
+                  icon: Icon(Icons.multitrack_audio),
+                  selectedIcon: Icon(Icons.multitrack_audio_outlined),
+                  label: Text('Tracker'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.cloud),
                   selectedIcon: Icon(Icons.cloud_outlined),
-                  label: Text('Clima'), // Nueva entrada
+                  label: Text('Clima'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.directions_bus),
+                  selectedIcon: Icon(Icons.directions_bus_filled),
+                  label: Text('Transport'),
                 ),
               ],
             ),
