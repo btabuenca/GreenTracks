@@ -46,7 +46,7 @@ class _WeatherForecastWidgetState extends State<WeatherForecastWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'El tiempo actual',
+          'Now',
           style: TextStyle(
             fontSize: 28,
           ),
@@ -55,7 +55,7 @@ class _WeatherForecastWidgetState extends State<WeatherForecastWidget> {
         _weatherCard(),
         const SizedBox(height: 40),
         const Text(
-          'Próximos 5 días',
+          'Next 5 days',
           style: TextStyle(
             fontSize: 28,
           ),

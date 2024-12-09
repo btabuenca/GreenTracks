@@ -6,6 +6,8 @@ import 'package:madtrack/screens/home/report_screen.dart';
 import 'package:madtrack/screens/home/settings_screen.dart';
 import 'package:madtrack/screens/home/weather_screen.dart';
 import 'package:madtrack/screens/public_transport_screen.dart';
+import 'package:madtrack/screens/webview_screen.dart';
+import 'package:madtrack/screens/home/routes_list_screen.dart'; // Importa la nueva pantalla
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,7 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
     const ReportScreen(),
     const TrackingScreen(),
     const WeatherScreen(),
-    const PublicTransportScreen(), // Nueva pantalla
+    const PublicTransportScreen(),
+    const WebViewScreen(),
+    const RoutesListScreen(), // Nueva pantalla añadida
   ];
 
   @override
@@ -72,17 +76,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 NavigationRailDestination(
                   icon: Icon(Icons.route),
                   selectedIcon: Icon(Icons.route_outlined),
-                  label: Text('Routes'),
+                  label: Text('Route'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.location_city),
-                  selectedIcon: Icon(Icons.location_city_outlined),
-                  label: Text('Spots'),
+                  icon: Icon(Icons.pin_drop),
+                  selectedIcon: Icon(Icons.pin_drop_outlined),
+                  label: Text('Spot'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.multitrack_audio),
                   selectedIcon: Icon(Icons.multitrack_audio_outlined),
-                  label: Text('Tracker'),
+                  label: Text('Track'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.cloud),
@@ -93,6 +97,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(Icons.directions_bus),
                   selectedIcon: Icon(Icons.directions_bus_filled),
                   label: Text('Transport'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.school),
+                  selectedIcon: Icon(Icons.school_outlined),
+                  label: Text('Learn'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.list),
+                  selectedIcon: Icon(Icons.list_alt),
+                  label: Text('Tracks'),
                 ),
               ],
             ),

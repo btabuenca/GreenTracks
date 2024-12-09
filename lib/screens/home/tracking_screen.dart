@@ -349,7 +349,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
           Center(
             child: ElevatedButton(
               onPressed: _isTracking ? _stopTracking : _startTracking,
-              child: Text(_isTracking ? 'Start tracking' : 'Stop tracking'),
+              child: Text(_isTracking ? 'Stop tracking' : 'Start tracking'),
             ),
           ),
           const SizedBox(height: 20),

@@ -18,10 +18,11 @@ class WelcomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              'SUTEE GreenTrackS',
+              'SUTEE\nGreenTrackS',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 20,
-                color: Colors.green,
+                fontSize: 30,
+                color: Color(0xFF006400),
                 fontWeight: FontWeight.bold,
               ),
             ),

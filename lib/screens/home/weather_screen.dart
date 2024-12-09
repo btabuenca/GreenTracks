@@ -8,12 +8,14 @@ class WeatherScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pronóstico del Tiempo'),
+        title: const Text('Weather forescast'),
       ),
-      body: Center(
-        child: const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: WeatherForecastWidget(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: WeatherForecastWidget(),
+          ),
         ),
       ),
     );
