@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const WeatherScreen(),
     const PublicTransportScreen(),
     const WebViewScreen(),
-    const RoutesListScreen(), // Nueva pantalla añadida
+    const RoutesListScreen(),
   ];
 
   @override
