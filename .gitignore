@@ -46,3 +46,7 @@ lib/credentials.dart
 # Multiplatform not yet interested
 /linux/
 /macos/
+
+# App credentials
+/assets/credentials.txt
+

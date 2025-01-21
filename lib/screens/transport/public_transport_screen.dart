@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:madtrack/screens/home/map_screen.dart';
+import 'package:madtrack/screens/transport/map_screen.dart';
 
 class PublicTransportScreen extends StatelessWidget {
   const PublicTransportScreen({super.key});

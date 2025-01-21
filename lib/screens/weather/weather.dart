@@ -1,30 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:weather/weather.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WeatherForecastWidget extends StatefulWidget {
   const WeatherForecastWidget({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _WeatherForecastWidgetState createState() => _WeatherForecastWidgetState();
 }
 
 class _WeatherForecastWidgetState extends State<WeatherForecastWidget> {
-  WeatherFactory wf = WeatherFactory("0eb379923e477dd1f26a6abdff420d2a",
-      language: Language.SPANISH);
+  WeatherFactory? wf;
   late Weather _currentWeather;
   List<Weather> _forecastData = [];
   bool _dataLoaded = false;
+  Position? _currentPosition;
 
   @override
   void initState() {
-    _fetchWeatherData();
     super.initState();
+    _loadTokenAndFetchData();
+  }
+
+  Future<void> _loadTokenAndFetchData() async {
+    String token = await _getTokenFromPreferences();
+    wf = WeatherFactory(token, language: Language.SPANISH);
+    await _fetchLocationAndWeatherData();
+  }
+
+  Future<String> _getTokenFromPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('tokenOpenWeatherMaps') ?? '';
+  }
+
+  Future<void> _fetchLocationAndWeatherData() async {
+    await _getCurrentLocation();
+    if (_currentPosition != null) {
+      await _fetchWeatherData();
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location services are disabled.')),
+      );
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.deniedForever) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location permissions are permanently denied.')),
+        );
+        return;
+      }
+    }
+
+    _currentPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
   }
 
   Future<void> _fetchWeatherData() async {
-    _currentWeather = await wf.currentWeatherByCityName('Madrid');
-    _forecastData = await wf.fiveDayForecastByCityName('Madrid');
+    _currentWeather = await wf!.currentWeatherByLocation(
+        _currentPosition!.latitude, _currentPosition!.longitude);
+    _forecastData = await wf!.fiveDayForecastByLocation(
+        _currentPosition!.latitude, _currentPosition!.longitude);
     setState(() {
       _dataLoaded = true;
     });
@@ -79,7 +124,7 @@ class _WeatherForecastWidgetState extends State<WeatherForecastWidget> {
             margin: const EdgeInsets.all(8.0),
             child: Padding(
               padding:
-                  const EdgeInsets.symmetric(vertical: 15.0, horizontal: 40.0),
+              const EdgeInsets.symmetric(vertical: 15.0, horizontal: 40.0),
               child: Column(
                 children: [
                   Text(

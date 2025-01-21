@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:madtrack/widgets/weather.dart';
+import 'package:madtrack/screens/weather/weather.dart';
 
 class WeatherScreen extends StatelessWidget {
   const WeatherScreen({super.key});

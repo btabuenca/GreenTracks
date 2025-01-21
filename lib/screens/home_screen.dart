@@ -4,8 +4,8 @@ import 'package:madtrack/screens/home/routes_screen.dart';
 import 'package:madtrack/screens/home/welcome_sreen.dart';
 import 'package:madtrack/screens/home/report_screen.dart';
 import 'package:madtrack/screens/home/settings_screen.dart';
-import 'package:madtrack/screens/home/weather_screen.dart';
-import 'package:madtrack/screens/public_transport_screen.dart';
+import 'package:madtrack/screens/weather/weather_screen.dart';
+import 'package:madtrack/screens/transport/public_transport_screen.dart';
 import 'package:madtrack/screens/webview_screen.dart';
 import 'package:madtrack/screens/home/routes_list_screen.dart'; // Importa la nueva pantalla
 

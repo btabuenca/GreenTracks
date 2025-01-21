@@ -175,21 +175,11 @@ class _ReportScreenState extends State<ReportScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      _currentPosition == null
-                          ? const CircularProgressIndicator()
-                          : Text(
-                        'Your position:\n'
-                            'Lat: ${_currentPosition?.latitude},\n'
-                            'Lon: ${_currentPosition?.longitude},\n'
-                            'Alt: ${_currentPosition?.altitude}',
-                        textAlign: TextAlign.left,
-                      ),
-                      const SizedBox(height: 20),
                       TextField(
                         controller: _reportController,
                         maxLines: 2,
                         decoration: const InputDecoration(
-                          labelText: 'Observation about your location',
+                          labelText: 'Observation about your position',
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -220,9 +210,26 @@ class _ReportScreenState extends State<ReportScreen> {
                         },
                       ),
                       const SizedBox(height: 20),
+                      _currentPosition == null
+                          ? const CircularProgressIndicator()
+                          : Text(
+                        'Your current position:\n'
+                            'Lat: ${_currentPosition?.latitude},\n'
+                            'Lon: ${_currentPosition?.longitude},\n'
+                            'Alt: ${_currentPosition?.altitude}',
+                        textAlign: TextAlign.left,
+                      ),
+                      const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: _submitReport,
-                        child: const Text('Save Observation'),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.pin_drop),
+                            SizedBox(width: 8),
+                            Text('Save Observation'),
+                          ],
+                        ),
                       ),
                     ],
                   ),
