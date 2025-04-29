@@ -29,38 +29,13 @@ class Chart extends StatelessWidget {
           OrdinalGroup(
             id: 'max',
             data: maxDataList,
-            color: colorScheme.primary,
           ),
           OrdinalGroup(
             id: 'min',
             data: minDataList,
-            color: colorScheme.primaryContainer,
           ),
         ],
         animate: true,
-        configRenderBar: ConfigRenderBar(
-          barGroupInnerPaddingPx: 0,
-        ),
-        /*barLabelDecorator: BarLabelDecorator(
-          barLabelPosition: BarLabelPosition.inside,
-          labelAnchor: BarLabelAnchor.end,
-        ),
-        barLabelValue: (group, ordinalGroupData, index) {
-          if (ordinalGroupData.measure < 5) return '';
-          String measure = ordinalGroupData.measure.round().toString();
-          return measure;
-        },*/
-        domainAxis: DomainAxis(
-          showLine: false,
-          gapAxisToLabel: 10,
-          labelStyle: LabelStyle(color: colorScheme.primary),
-          lineStyle: LineStyle(color: colorScheme.primary),
-        ),
-        measureAxis: MeasureAxis(
-          showLine: true,
-          labelStyle: LabelStyle(color: colorScheme.primary),
-          lineStyle: LineStyle(color: colorScheme.primary),
-        ),
       ),
     );
   }
@@ -93,7 +68,7 @@ class Chart extends StatelessWidget {
     int division = (time / parts).floor();
     int remainder = time % parts;
     List<int> portions =
-        List.generate(parts, (index) => division * (index + 1));
+    List.generate(parts, (index) => division * (index + 1));
     portions[parts - 1] += remainder;
     return portions;
   }
