@@ -1,0 +1,14 @@
+{
+  "app_title": "GreenTrackS!",
+  "welcome_message": "Willkommen bei GreenTrackS!",
+  "login": "Anmelden",
+  "menu_home": "Start",
+  "menu_route": "Route",
+  "menu_spot": "Sehenswürdigkeit",
+  "menu_track": "Messen",
+  "menu_clima": "Wetter",
+  "menu_trasport": "Verkehr",
+  "menu_learn": "Lernen",
+  "menu_tracks": "Routen",
+  "register": "Registrieren"
+}

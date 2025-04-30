@@ -1,5 +1,5 @@
 name: madtrack
-description: "A new Flutter project."
+description: "A mobile app to explore green routes in urban areas."
 
 version: 1.0.0+1
 
@@ -8,6 +8,8 @@ environment:
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.3
@@ -22,7 +24,7 @@ dependencies:
   http: ^1.2.0
   weather: ^3.1.1
   permission_handler: ^11.3.0
-  intl: ^0.20.2
+  intl: ^0.19.0
   sqflite: ^2.0.0+3
   path: ^1.8.0
   path_provider: ^2.0.11
@@ -31,6 +33,15 @@ dependencies:
   webview_flutter: ^4.0.1
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/icon_512x.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/icon_512x.png"
+
   flutter_test:
     sdk: flutter
 
@@ -39,8 +50,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-
   assets:
     - assets/sutee_leaf_trasp_510x.png
     - assets/credentials.txt
+    - assets/login_image.png
+    - assets/languages/en.json
+    - assets/languages/es.json
+    - assets/languages/de.json
+    - assets/languages/el.json
   #   - images/a_dot_ham.jpeg

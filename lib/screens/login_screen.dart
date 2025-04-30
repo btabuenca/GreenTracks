@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:madtrack/models/auth_result.dart';
-import 'package:madtrack/controllers/auth_manager.dart';
-import 'package:madtrack/screens/home_screen.dart';
-import 'package:madtrack/screens/register_screen.dart';
-import 'package:madtrack/widgets/my_app_bar.dart';
-import 'package:madtrack/widgets/slide_transition.dart';
+import '../models/auth_result.dart';
+import '../controllers/auth_manager.dart';
+import '../screens/home_screen.dart';
+import '../screens/register_screen.dart';
+import '../widgets/my_app_bar.dart';
+import '../widgets/slide_transition.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,11 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isObscure = true;
   bool _circleLoading = false;
   final Image _loginImage = Image.asset("assets/login_image.png");
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         _circleLoading = true;
                       });
                       AuthResult result =
-                          await AuthManager().signInWithEmailAndPassword(
+                      await AuthManager().signInWithEmailAndPassword(
                         _emailController.text.trim(),
                         _passwordController.text.trim(),
                       );
@@ -84,7 +79,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           SlideTransitionClass(
                               page: const HomeScreen(), direction: 'left'),
                         );
-                        // btb DataManager().updateData();
                       } else {
                         final snackBar = SnackBar(
                           content: Text(

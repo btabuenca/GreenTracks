@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import '../../main.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -11,6 +12,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _switchValue = false;
+  String _selectedLanguage = 'en';
   final TextEditingController _textController = TextEditingController();
 
   @override
@@ -31,6 +33,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _switchValue = prefs.getBool('switchValue') ?? false;
       _textController.text = savedToken!;
+    });
+    setState(() {
+      _selectedLanguage = prefs.getString('languageCode') ?? 'en';
+    });
+  }
+
+  Future<void> _loadLanguage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedLanguage = prefs.getString('languageCode') ?? 'en';
+    });
+  }
+
+  void _changeLanguage(String languageCode) {
+    MyApp.of(context).changeLanguage(languageCode);
+    setState(() {
+      _selectedLanguage = languageCode;
     });
   }
 
@@ -86,6 +105,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               onChanged: (value) {
                 _savePreferences();
+              },
+            ),
+            const SizedBox(height: 20),
+            DropdownButton<String>(
+              value: _selectedLanguage,
+              items: const [
+                DropdownMenuItem(value: 'en', child: Text('English')),
+                DropdownMenuItem(value: 'es', child: Text('Español')),
+                DropdownMenuItem(value: 'de', child: Text('Deutsch')),
+                DropdownMenuItem(value: 'el', child: Text('Ελληνικά')),
+              ],
+              onChanged: (String? value) {
+                if (value != null) {
+                  _changeLanguage(value);
+                }
               },
             ),
           ],

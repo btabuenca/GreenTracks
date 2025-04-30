@@ -41,7 +41,7 @@
         android:value="2" />
         <meta-data 
         android:name="com.google.android.geo.API_KEY"
-        android:value="AIzaSyCNiUjJP88qALClvC4NFPYC2uZcsVCo0m4"/>
+        android:value="AIzaSyA9Oax0F5X0YqlA6qMaiIVf69M5sE6zSco"/>
         <meta-data
         android:name="android.enableOnBackPressedCallback"
         android:value="true" />

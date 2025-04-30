@@ -1,0 +1,14 @@
+{
+  "app_title": "GreenTrackS!",
+  "welcome_message": "Καλώς ήρθατε στο GreenTrackS!",
+  "login": "Σύνδεση",
+  "menu_home": "Αρχική",
+  "menu_route": "Διαδρομή",
+  "menu_spot": "Σημείο ενδιαφέροντος",
+  "menu_track": "Μέτρηση",
+  "menu_clima": "Καιρός",
+  "menu_trasport": "Μεταφορές",
+  "menu_learn": "Μάθετε",
+  "menu_tracks": "Διαδρομές",
+  "register": "Εγγραφή"
+}
