@@ -3,7 +3,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
-import 'telemetry_map_screen.dart'; // Importa la pantalla de mapa
+import 'package:madtrack/lang/l10n.dart';
+import 'telemetry_map_screen.dart';
 
 /// A screen where users can report their observations about their current location.
 class ReportScreen extends StatefulWidget {
@@ -50,7 +51,7 @@ class _ReportScreenState extends State<ReportScreen> {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location services are disabled.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.translate('location_service_disabled'))),
       );
       return;
     }
@@ -60,7 +61,7 @@ class _ReportScreenState extends State<ReportScreen> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.deniedForever) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permissions are permanently denied.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.translate('location_permission_denied'))),
         );
         return;
       }
@@ -132,7 +133,7 @@ class _ReportScreenState extends State<ReportScreen> {
         );
         if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Report saved successfully')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.translate('report_saved_ok'))),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -146,7 +147,7 @@ class _ReportScreenState extends State<ReportScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a report and allow geolocation')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.translate('report_enable_geoloc'))),
       );
     }
   }
@@ -165,7 +166,7 @@ class _ReportScreenState extends State<ReportScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Spot Observations'),
+          title: Text(AppLocalizations.of(context)!.translate('report_spot_observation')),
         ),
         body: Column(
           children: [
@@ -178,8 +179,8 @@ class _ReportScreenState extends State<ReportScreen> {
                       TextField(
                         controller: _reportController,
                         maxLines: 2,
-                        decoration: const InputDecoration(
-                          labelText: 'Observation about your position',
+                        decoration: InputDecoration(
+                          label: Text(AppLocalizations.of(context)!.translate('report_label_observation_position')),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -202,8 +203,8 @@ class _ReportScreenState extends State<ReportScreen> {
                           return TextField(
                             controller: controller,
                             focusNode: focusNode,
-                            decoration: const InputDecoration(
-                              labelText: 'Route name (Optional)',
+                            decoration: InputDecoration(
+                              label: Text(AppLocalizations.of(context)!.translate('report_label_route_name')),
                               border: OutlineInputBorder(),
                             ),
                           );
@@ -224,10 +225,10 @@ class _ReportScreenState extends State<ReportScreen> {
                         onPressed: _submitReport,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
+                          children: [
                             Icon(Icons.pin_drop),
                             SizedBox(width: 8),
-                            Text('Save Observation'),
+                            Text(AppLocalizations.of(context)!.translate('report_elevated_save_observation')),
                           ],
                         ),
                       ),

@@ -35,9 +35,11 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    _loadThemeMode();
     super.initState();
+    _loadPreferences();
+    _loadThemeMode();
   }
+
 
   Future<void> _loadPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

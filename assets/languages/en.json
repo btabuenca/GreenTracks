@@ -4,11 +4,21 @@
   "login": "Log in",
   "menu_home": "Home",
   "menu_route": "Route",
-  "menu_spot": "Point of Interest",
+  "menu_spot": "Spots",
   "menu_track": "Measure",
   "menu_clima": "Weather",
   "menu_trasport": "Transport",
   "menu_learn": "Learn",
   "menu_tracks": "Routes",
-  "register": "Register"
+  "register": "Register",
+  "location_service_disabled": "Location services are disabled",
+  "location_permission_denied": "Location permissions are permanently denied",
+  "error": "Error",
+  "report_enable_geoloc": "Please enter a report and enable geolocation",
+  "report_elevated_save_observation": "Save observation",
+  "report_saved_ok": "Report saved successfully",
+  "report_saved_ko": "Error saving report",
+  "report_spot_observation": "Spot observations",
+  "report_label_observation_position": "Observation about your position",
+  "report_label_route_name": "Route name (Optional)"
 }

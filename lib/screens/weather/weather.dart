@@ -190,7 +190,8 @@ class _WeatherForecastWidgetState extends State<WeatherForecastWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
+                Flexible(
+                  flex: 2,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -206,7 +207,8 @@ class _WeatherForecastWidgetState extends State<WeatherForecastWidget> {
                     ],
                   ),
                 ),
-                Expanded(
+                Flexible(
+                  flex: 1,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -235,31 +237,33 @@ class _WeatherForecastWidgetState extends State<WeatherForecastWidget> {
                   ],
                 ),
                 const SizedBox(width: 20),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Sensación térmica: ${_currentWeather.tempFeelsLike?.celsius?.toStringAsPrecision(2)}°C',
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                    Text(
-                      'Min: ${_currentWeather.tempMin?.celsius?.toStringAsPrecision(2)}°C',
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                    Text(
-                      'Max: ${_currentWeather.tempMax?.celsius?.toStringAsPrecision(2)}°C',
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                    Text(
-                      'Viento: ${_currentWeather.windSpeed?.round()}km/h',
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                    Text(
-                      'Humedad: ${_currentWeather.humidity?.round()}%',
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                  ],
+                Flexible(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Sensación térmica: ${_currentWeather.tempFeelsLike?.celsius?.toStringAsPrecision(2)}°C',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      Text(
+                        'Min: ${_currentWeather.tempMin?.celsius?.toStringAsPrecision(2)}°C',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      Text(
+                        'Max: ${_currentWeather.tempMax?.celsius?.toStringAsPrecision(2)}°C',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      Text(
+                        'Viento: ${_currentWeather.windSpeed?.round()}km/h',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      Text(
+                        'Humedad: ${_currentWeather.humidity?.round()}%',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

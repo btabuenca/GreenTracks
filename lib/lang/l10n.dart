@@ -16,17 +16,19 @@ class AppLocalizations {
 
   late Map<String, String> _localizedStrings;
 
-  Future<void> load() async {
+    Future<AppLocalizations> load() async {
     String jsonString = await rootBundle
         .loadString('assets/languages/${locale.languageCode}.json');
     Map<String, dynamic> jsonMap = json.decode(jsonString);
 
     _localizedStrings =
         jsonMap.map((key, value) => MapEntry(key, value.toString()));
+
+    return this;
   }
 
   String translate(String key) {
-    return _localizedStrings[key] ?? key;
+    return _localizedStrings[key] ?? '**$key**';
   }
 }
 
@@ -40,11 +42,8 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  Future<AppLocalizations> load(Locale locale) async {
-    AppLocalizations localizations = AppLocalizations(locale);
-    await localizations.load();
-    return localizations;
-  }
+  Future<AppLocalizations> load(Locale locale) =>
+      AppLocalizations(locale).load();
 
   @override
   bool shouldReload(covariant LocalizationsDelegate<AppLocalizations> old) {

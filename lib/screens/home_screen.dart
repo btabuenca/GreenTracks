@@ -24,11 +24,11 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     const WelcomeScreen(),
     const RoutesScreen(),
-    const ReportScreen(),
     const TrackingScreen(),
     const WeatherScreen(),
     const PublicTransportScreen(),
     const WebViewScreen(),
+    const ReportScreen(),
     const RoutesListScreen(),
   ];
 
@@ -80,11 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: Text(AppLocalizations.of(context)!.translate('menu_route')),
                 ),
                 NavigationRailDestination(
-                  icon: const Icon(Icons.pin_drop),
-                  selectedIcon: const Icon(Icons.pin_drop_outlined),
-                  label: Text(AppLocalizations.of(context)!.translate('menu_spot')),
-                ),
-                NavigationRailDestination(
                   icon: const Icon(Icons.multitrack_audio),
                   selectedIcon: const Icon(Icons.multitrack_audio_outlined),
                   label: Text(AppLocalizations.of(context)!.translate('menu_track')),
@@ -103,6 +98,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.school),
                   selectedIcon: const Icon(Icons.school_outlined),
                   label: Text(AppLocalizations.of(context)!.translate('menu_learn')),
+                ),
+                NavigationRailDestination(
+                  icon: const Icon(Icons.pin_drop),
+                  selectedIcon: const Icon(Icons.pin_drop_outlined),
+                  label: Text(AppLocalizations.of(context)!.translate('menu_spot')),
                 ),
                 NavigationRailDestination(
                   icon: const Icon(Icons.list),
