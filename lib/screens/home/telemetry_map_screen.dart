@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator_platform_interface/src/models/position.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class TelemetryMapScreen extends StatefulWidget {
-  const TelemetryMapScreen({super.key});
+  final Position? position;
+
+  const TelemetryMapScreen({super.key, this.position});
 
   @override
   _TelemetryMapScreenState createState() => _TelemetryMapScreenState();
 }
 
 class _TelemetryMapScreenState extends State<TelemetryMapScreen> {
-  /// Lista de puntos de telemetría organizados por rutas
-  final Map<String?, List<LatLng>> _routes = {};
+  final Map<String?, List<Map<String, dynamic>>> _rawRoutes = {};
   bool _isLoading = true;
 
   @override
@@ -21,7 +23,6 @@ class _TelemetryMapScreenState extends State<TelemetryMapScreen> {
     _fetchTelemetries();
   }
 
-  /// Método para obtener las telemetrías desde la API y organizarlas por rutas
   Future<void> _fetchTelemetries() async {
     const url = 'https://flow.iot.etsisi.upm.es/sutee/telemetry?device=1';
     try {
@@ -29,27 +30,32 @@ class _TelemetryMapScreenState extends State<TelemetryMapScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data is List) {
-          final Map<String?, List<LatLng>> routes = {};
+          final Map<String?, List<Map<String, dynamic>>> routes = {};
 
           for (var item in data) {
-            final latitude = item['latitude'];
-            final longitude = item['longitude'];
-            final route = item['route']; // Puede ser null
-
-            if (latitude is double && longitude is double) {
-              final point = LatLng(latitude, longitude);
-
-              // Organiza los puntos por la clave `route`
+            final lat = item['latitude'];
+            final lon = item['longitude'];
+            final route = item['route'];
+            if (lat is double && lon is double) {
               if (!routes.containsKey(route)) {
                 routes[route] = [];
               }
-              routes[route]?.add(point);
+              routes[route]!.add(item);
             }
           }
 
+          // Ordenar por timestamp_server dentro de cada ruta
+          routes.forEach((route, points) {
+            points.sort((a, b) {
+              final ta = DateTime.tryParse(a['timestamp_server'] ?? '') ?? DateTime(0);
+              final tb = DateTime.tryParse(b['timestamp_server'] ?? '') ?? DateTime(0);
+              return ta.compareTo(tb);
+            });
+          });
+
           setState(() {
-            _routes.clear();
-            _routes.addAll(routes);
+            _rawRoutes.clear();
+            _rawRoutes.addAll(routes);
             _isLoading = false;
           });
         }
@@ -66,6 +72,15 @@ class _TelemetryMapScreenState extends State<TelemetryMapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final initialPosition = widget.position != null
+        ? LatLng(widget.position!.latitude, widget.position!.longitude)
+        : _rawRoutes.isNotEmpty && _rawRoutes.values.first.isNotEmpty
+        ? LatLng(
+      _rawRoutes.values.first.first['latitude'],
+      _rawRoutes.values.first.first['longitude'],
+    )
+        : const LatLng(0, 0);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Telemetry Map'),
@@ -74,10 +89,8 @@ class _TelemetryMapScreenState extends State<TelemetryMapScreen> {
           ? const Center(child: CircularProgressIndicator())
           : GoogleMap(
         initialCameraPosition: CameraPosition(
-          target: _routes.isNotEmpty
-              ? _routes.values.first.first
-              : const LatLng(0, 0),
-          zoom: 12.0,
+          target: initialPosition,
+          zoom: 14.0,
         ),
         markers: _generateMarkers(),
         polylines: _generatePolylines(),
@@ -85,44 +98,81 @@ class _TelemetryMapScreenState extends State<TelemetryMapScreen> {
     );
   }
 
-  /// Genera marcadores con colores diferentes para puntos con y sin `route`
   Set<Marker> _generateMarkers() {
     final Set<Marker> markers = {};
-    _routes.forEach((route, points) {
-      final color = route == null ? BitmapDescriptor.hueRed : BitmapDescriptor.hueGreen;
 
-      for (final point in points) {
+    _rawRoutes.forEach((route, points) {
+      for (int i = 0; i < points.length; i++) {
+        final item = points[i];
+        final point = LatLng(item['latitude'], item['longitude']);
+        final isFirst = i == 0;
+
+        final icon = (route == null || route.toString().trim().isEmpty)
+            ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)
+            : isFirst
+            ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue)
+            : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan);
+
+        final metadata = item['dataset']?['metadata'];
+
+        final showInfoWindow = isFirst && route != null && route.toString().trim().isNotEmpty;
+
         markers.add(
           Marker(
-            markerId: MarkerId('${point.latitude}-${point.longitude}'),
+            markerId: MarkerId('$route-${point.latitude}-${point.longitude}'),
             position: point,
-            icon: BitmapDescriptor.defaultMarkerWithHue(color),
-            infoWindow: InfoWindow(
-              title: route ?? 'No Route',
-              snippet: 'Lat: ${point.latitude}, Lon: ${point.longitude}',
-            ),
+            icon: icon,
+            infoWindow: showInfoWindow
+                ? InfoWindow(
+              title: 'Inicio de ruta: $route',
+              snippet: metadata != null ? metadata.toString() : '',
+            )
+                : InfoWindow.noText,
           ),
         );
       }
     });
+
+    if (widget.position != null) {
+      final userLatLng = LatLng(widget.position!.latitude, widget.position!.longitude);
+      markers.add(
+        Marker(
+          markerId: const MarkerId('user_position'),
+          position: userLatLng,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          infoWindow: const InfoWindow(
+            title: 'Tu posición reportada',
+            snippet: 'Este es el punto que acabas de enviar',
+          ),
+        ),
+      );
+    }
+
     return markers;
   }
 
-  /// Genera polilíneas para conectar puntos con el mismo `route`
   Set<Polyline> _generatePolylines() {
     final Set<Polyline> polylines = {};
-    _routes.forEach((route, points) {
-      if (route != null && points.length > 1) {
+
+    _rawRoutes.forEach((route, points) {
+      if (route != null &&
+          route.toString().trim().isNotEmpty &&
+          points.length > 1) {
+        final latLngs = points
+            .map<LatLng>((item) => LatLng(item['latitude'], item['longitude']))
+            .toList();
+
         polylines.add(
           Polyline(
             polylineId: PolylineId(route),
-            points: points,
-            color: Colors.blue, // Cambia el color de las líneas si es necesario
+            points: latLngs,
+            color: Colors.blue,
             width: 4,
           ),
         );
       }
     });
+
     return polylines;
   }
 }
