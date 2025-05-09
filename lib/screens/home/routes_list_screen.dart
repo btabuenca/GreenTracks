@@ -22,7 +22,7 @@ class _RoutesListScreenState extends State<RoutesListScreen> {
   }
 
   Future<void> _fetchRoutes() async {
-    const url = 'https://flow.iot.etsisi.upm.es/sutee/routes?device=1';
+    const url = 'https://flow.iot.etsisi.upm.es/sutee/routes2?device=1';
     try {
       final response = await http.get(Uri.parse(url));
 

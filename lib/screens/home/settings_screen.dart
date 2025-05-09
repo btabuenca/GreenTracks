@@ -11,9 +11,10 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _switchValue = false;
   String _selectedLanguage = 'en';
   final TextEditingController _textController = TextEditingController();
+  final TextEditingController _cadenceController = TextEditingController();
+  int _samplingIntervalSeconds = 1;
 
   @override
   void initState() {
@@ -21,7 +22,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadPreferences();
   }
 
-  // Cargar las preferencias guardadas
   Future<void> _loadPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedToken = prefs.getString('tokenOpenWeatherMaps');
@@ -31,25 +31,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       savedToken = defaultToken;
     }
     setState(() {
-      _switchValue = prefs.getBool('switchValue') ?? false;
+      _selectedLanguage = prefs.getString('languageCode') ?? 'en';
+      _samplingIntervalSeconds = prefs.getInt('samplingInterval') ?? 1;
       _textController.text = savedToken!;
-    });
-    setState(() {
-      _selectedLanguage = prefs.getString('languageCode') ?? 'en';
-    });
-  }
-
-  Future<void> _loadLanguage() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _selectedLanguage = prefs.getString('languageCode') ?? 'en';
-    });
-  }
-
-  void _changeLanguage(String languageCode) {
-    MyApp.of(context).changeLanguage(languageCode);
-    setState(() {
-      _selectedLanguage = languageCode;
+      _cadenceController.text = _samplingIntervalSeconds.toString();
     });
   }
 
@@ -63,17 +48,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
     } catch (e) {
-      // Handle the error if the file cannot be read
       print('Error reading config file: $e');
     }
     return '';
   }
 
-  // Guardar las preferencias
   Future<void> _savePreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('switchValue', _switchValue);
     await prefs.setString('tokenOpenWeatherMaps', _textController.text);
+    await prefs.setInt('samplingInterval', _samplingIntervalSeconds);
+  }
+
+  void _changeLanguage(String languageCode) {
+    MyApp.of(context).changeLanguage(languageCode);
+    setState(() {
+      _selectedLanguage = languageCode;
+    });
   }
 
   @override
@@ -86,16 +76,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            SwitchListTile(
-              title: const Text('Opción habilitada'),
-              value: _switchValue,
-              onChanged: (bool value) {
-                setState(() {
-                  _switchValue = value;
-                });
-                _savePreferences();
-              },
-            ),
             const SizedBox(height: 20),
             TextField(
               controller: _textController,
@@ -105,6 +85,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               onChanged: (value) {
                 _savePreferences();
+              },
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _cadenceController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Sample frequency (seconds)',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                final seconds = int.tryParse(value);
+                if (seconds != null && seconds > 0) {
+                  _samplingIntervalSeconds = seconds;
+                  _savePreferences();
+                }
               },
             ),
             const SizedBox(height: 20),

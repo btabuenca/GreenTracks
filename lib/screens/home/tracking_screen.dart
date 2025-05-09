@@ -46,6 +46,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
   double? _endLongitude;
   double? _endAltitude;
 
+  DateTime? _lastSampleTime;
+  int _samplingIntervalSeconds = 1;
+
+
   final dbHelper = DatabaseHelper();
 
   Map<String, dynamic>? _luxStats;
@@ -68,6 +72,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
     setState(() {
       getLux = prefs.getBool('getLux') ?? true;
       getNoise = prefs.getBool('getNoise') ?? true;
+      _samplingIntervalSeconds = prefs.getInt('samplingInterval') ?? 1;
     });
   }
 
@@ -89,33 +94,33 @@ class _TrackingScreenState extends State<TrackingScreen> {
     // Formateamos el JSON de acuerdo al formato requerido
     final postData = {
 //      "body": {
-        "n": "MadTrack",
-        "id": "1",
-        "meta": {"ver": "3.0"},
-        "cols": [
-          {"name": "timestamp", "meta": {"tz": "UTC"}},
-          {"name": "noise", "unit": "dB"},
-          {"name": "light", "unit": "lux"},
-          {"name": "latitude", "unit": "deg"},
-          {"name": "longitude", "unit": "deg"},
-          {"name": "altitude", "unit": "m"}
-        ],
-        "rows": data.map((record) {
-          return {
-            "timestamp": record["timestamp"],
-            "noise": record["decibel"],
-            "light": record["lux"],
-            "latitude": record["latitude"],
-            "longitude": record["longitude"],
-            "altitude": record["altitude"]
-          };
-        }).toList(),
+      "n": "MadTrack",
+      "id": "1",
+      "meta": {"ver": "3.0"},
+      "cols": [
+        {"name": "timestamp", "meta": {"tz": "UTC"}},
+        {"name": "noise", "unit": "dB"},
+        {"name": "light", "unit": "lux"},
+        {"name": "latitude", "unit": "deg"},
+        {"name": "longitude", "unit": "deg"},
+        {"name": "altitude", "unit": "m"}
+      ],
+      "rows": data.map((record) {
+        return {
+          "timestamp": record["timestamp"],
+          "noise": record["decibel"],
+          "light": record["lux"],
+          "latitude": record["latitude"],
+          "longitude": record["longitude"],
+          "altitude": record["altitude"]
+        };
+      }).toList(),
 //      }
     };
 
     // Enviamos el JSON a la API RESTful
     final response = await http.post(
-      Uri.parse("https://flow.iot.etsisi.upm.es/sutee/telemetries"),
+      Uri.parse("https://flow.iot.etsisi.upm.es/sutee/telemetries2"),
       headers: {"Content-Type": "application/json"},
       body: json.encode(postData),
     );
@@ -213,6 +218,13 @@ class _TrackingScreenState extends State<TrackingScreen> {
   }
 
   Future<void> _saveTelemetry() async {
+    final now = DateTime.now();
+    if (_lastSampleTime != null &&
+        now.difference(_lastSampleTime!).inSeconds < _samplingIntervalSeconds) {
+      return; // aún no ha pasado el intervalo
+    }
+    _lastSampleTime = now;
+
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     setState(() {
@@ -220,8 +232,16 @@ class _TrackingScreenState extends State<TrackingScreen> {
       _longitude = position.longitude;
       _altitude = position.altitude;
     });
-    await dbHelper.insertTelemetry(_luxValue, _decibelValue, _latitude, _longitude, _altitude);
+
+    await dbHelper.insertTelemetry(
+      _luxValue,
+      _decibelValue,
+      _latitude,
+      _longitude,
+      _altitude,
+    );
   }
+
 
   Future<void> _exportToCSV() async {
     final data = await dbHelper.getTelemetry();
@@ -390,7 +410,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text("Hora Inicio: ${_startTime?.toLocal()}"),
-                  Text("Hora Fin: ${_endTime?.toLocal()}"),
+                  if (_startTime != null && _endTime != null)
+                    Text(
+                      "Duración: ${_formatDuration(_endTime!.difference(_startTime!))}",
+                    ),
                   Text("Coords. Inicio: $_startLatitude, $_startLongitude, $_startAltitude"),
                   Text("Coords. Final: $_endLatitude, $_endLongitude, $_endAltitude"),
                   if (_luxStats != null) ...[
@@ -419,6 +442,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
         ],
       ),
     );
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds % 60;
+    return "$minutes min ${seconds.toString().padLeft(2, '0')} sec";
   }
 
   @override

@@ -144,8 +144,10 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Future<void> _submitReport() async {
     if (_reportController.text.isNotEmpty && _currentPosition != null) {
-      const url = 'https://flow.iot.etsisi.upm.es/sutee/telemetry';
-      Map<String, dynamic> reportData = {
+      const url1 = 'https://flow.iot.etsisi.upm.es/sutee/telemetry';
+      const url2 = 'https://flow.iot.etsisi.upm.es/sutee/telemetry2';
+
+      final reportData1 = {
         "id_device": 1,
         "route": _routeController.text,
         "latitude": _currentPosition?.latitude,
@@ -156,29 +158,50 @@ class _ReportScreenState extends State<ReportScreen> {
         }
       };
 
+      final reportData2 = {
+        "id_device": 1,
+        if (_routeController.text.trim().isNotEmpty)
+          "route": _routeController.text.trim(),
+        "latitude": _currentPosition?.latitude,
+        "longitude": _currentPosition?.longitude,
+        "altitude": _currentPosition?.altitude,
+        "col_10": _reportController.text,
+        "metadata": {
+          "game": 1
+        },
+        if (_routeController.text.trim().isNotEmpty)
+          "route": _routeController.text.trim(),
+      };
+
+
       try {
-        final response = await http.post(
-          Uri.parse(url),
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: json.encode(reportData),
+        // Primera llamada: telemetry
+        final response1 = await http.post(
+          Uri.parse(url1),
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(reportData1),
         );
-        if (response.statusCode == 200) {
+
+        // Segunda llamada: telemetry2
+        final response2 = await http.post(
+          Uri.parse(url2),
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(reportData2),
+        );
+
+        if (response1.statusCode == 200 && response2.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(AppLocalizations.of(context)!.translate('report_saved_ok'))),
           );
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => TelemetryMapScreen(
-                position: _currentPosition,
-              ),
+              builder: (_) => TelemetryMapScreen(position: _currentPosition),
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error saving report: ${response.statusCode}')),
+            SnackBar(content: Text('Error saving report: ${response1.statusCode}, ${response2.statusCode}')),
           );
         }
       } catch (error) {

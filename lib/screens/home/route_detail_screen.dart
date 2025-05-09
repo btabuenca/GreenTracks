@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class RouteDetailScreen extends StatefulWidget {
   final String routeName;
@@ -13,7 +14,7 @@ class RouteDetailScreen extends StatefulWidget {
 }
 
 class _RouteDetailScreenState extends State<RouteDetailScreen> {
-  List<LatLng> _routePoints = [];
+  List<Map<String, dynamic>> _routeRawPoints = [];
   bool _isLoading = true;
 
   @override
@@ -23,7 +24,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
   }
 
   Future<void> _fetchRouteDetails() async {
-    final url = 'https://flow.iot.etsisi.upm.es/sutee/route?device=1&route=${widget.routeName}';
+    final url = 'https://flow.iot.etsisi.upm.es/sutee/route2?device=1&route=${widget.routeName}';
     try {
       final response = await http.get(Uri.parse(url));
 
@@ -32,9 +33,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
 
         if (data is List) {
           setState(() {
-            _routePoints = data.map<LatLng>((point) {
-              return LatLng(point['latitude'], point['longitude']);
-            }).toList();
+            _routeRawPoints = List<Map<String, dynamic>>.from(data);
             _isLoading = false;
           });
         } else {
@@ -53,43 +52,74 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     }
   }
 
+  String _formatTimestamp(String? timestamp) {
+    if (timestamp == null) return '';
+    try {
+      final dateTime = DateTime.parse(timestamp);
+      return DateFormat('dd/MM/yyyy HH:mm').format(dateTime);
+    } catch (_) {
+      return timestamp;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final List<LatLng> _latLngPoints = _routeRawPoints
+        .map((point) => LatLng(point['latitude'], point['longitude']))
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Route: ${widget.routeName}'),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _routePoints.isEmpty
+          : _latLngPoints.isEmpty
           ? const Center(child: Text('No points available for this route.'))
           : GoogleMap(
         initialCameraPosition: CameraPosition(
-          target: _routePoints.isNotEmpty
-              ? _routePoints.first
-              : const LatLng(0, 0),
+          target: _latLngPoints.first,
           zoom: 16.0,
         ),
         polylines: {
           Polyline(
             polylineId: const PolylineId('route'),
-            points: _routePoints,
+            points: _latLngPoints,
             color: Colors.blue,
             width: 5,
           ),
         },
-        markers: _routePoints
+        markers: _routeRawPoints
             .asMap()
-            .map((index, point) => MapEntry(
-          index.toString(),
-          Marker(
-            markerId: MarkerId('point_$index'),
-            position: point,
-            infoWindow: InfoWindow(
-              title: 'Point ${index + 1}',
+            .map((index, point) {
+          final latLng = LatLng(point['latitude'], point['longitude']);
+          final rawTitle = point['col_10'];
+          final title = rawTitle != null ? rawTitle.toString().trim() : '';
+          final timestamp = point['timestamp_z'];
+          final metadata = point['dataset']?['metadata']?.toString().trim();
+
+          final snippetLines = [
+            _formatTimestamp(timestamp),
+            if (metadata != null && metadata.isNotEmpty) metadata,
+          ];
+
+          return MapEntry(
+            index.toString(),
+            Marker(
+              markerId: MarkerId('point_$index'),
+              position: latLng,
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                index == 0
+                    ? BitmapDescriptor.hueBlue
+                    : BitmapDescriptor.hueCyan,
+              ),
+              infoWindow: InfoWindow(
+                title: title.isNotEmpty ? title : 'Point ${index + 1}',
+                snippet: snippetLines.join('\n'),
+              ),
             ),
-          ),
-        ))
+          );
+        })
             .values
             .toSet(),
       ),
