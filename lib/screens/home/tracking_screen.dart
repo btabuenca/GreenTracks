@@ -14,6 +14,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import 'package:latlong2/latlong.dart';
+import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
+
 
 class TrackingScreen extends StatefulWidget {
   const TrackingScreen({super.key});
@@ -282,30 +285,22 @@ class _TrackingScreenState extends State<TrackingScreen> {
     }
 
     String csvData = const ListToCsvConverter().convert(rows);
-    Directory? directory;
-    if (Platform.isAndroid) {
-      directory = Directory('/storage/emulated/0/Download');
-    } else if (Platform.isIOS) {
-      directory = await getApplicationDocumentsDirectory();
-    }
 
-    if (directory != null) {
+    try {
+      final directory = await getTemporaryDirectory(); // ⚠️ Carpeta temporal para compartir
       final path = "${directory.path}/telemetry_data.csv";
       final file = File(path);
+      await file.writeAsString(csvData);
 
-      try {
-        await file.writeAsString(csvData);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Datos exportados a $path"),
-        ));
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error al guardar archivo: $e")),
-        );
-      }
-    } else {
+      // Comparte el archivo CSV
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: "Adjunto CSV de telemetría generado desde MadTrack.",
+        subject: "GreenTrackS dataset",
+      );
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No se pudo acceder al directorio")),
+        SnackBar(content: Text("Error al generar/compartir archivo: $e")),
       );
     }
   }
@@ -430,23 +425,81 @@ class _TrackingScreenState extends State<TrackingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Hora Inicio: ${_startTime?.toLocal()}"),
-                  if (_startTime != null && _endTime != null)
-                    Text(
-                      "Duración: ${_formatDuration(_endTime!.difference(_startTime!))}",
+                  Card(
+                    elevation: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("Resumen", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          if (_startTime != null)
+                            ListTile(
+                              leading: const Icon(Icons.play_arrow),
+                              title: const Text("Hora de inicio"),
+                              subtitle: Text(DateFormat('yyyy/MM/dd HH:mm:ss').format(_startTime!.toLocal())),
+                            ),
+                          if (_startTime != null && _endTime != null)
+                            ListTile(
+                              leading: const Icon(Icons.timer),
+                              title: const Text("Duración"),
+                              subtitle: Text(_formatDuration(_endTime!.difference(_startTime!))),
+                            ),
+                          if (_totalDistanceMeters != null)
+                            ListTile(
+                              leading: const Icon(Icons.directions_walk),
+                              title: const Text("Distancia total recorrida"),
+                              subtitle: Text("$_totalDistanceMeters metros"),
+                            ),
+                          ListTile(
+                            leading: const Icon(Icons.flag),
+                            title: const Text("Coordenadas de inicio"),
+                            subtitle: Text(
+                              "Latitud: ${_startLatitude?.toStringAsFixed(3)}\n"
+                                  "Longitud: ${_startLongitude?.toStringAsFixed(3)}\n"
+                                  "Altitud: ${_startAltitude?.toStringAsFixed(3)} m",
+                            ),
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.outlined_flag),
+                            title: const Text("Coordenadas finales"),
+                            subtitle: Text(
+                              "Latitud: ${_endLatitude?.toStringAsFixed(3)}\n"
+                                  "Longitud: ${_endLongitude?.toStringAsFixed(3)}\n"
+                                  "Altitud: ${_endAltitude?.toStringAsFixed(3)} m",
+                            ),
+                          ),
+                          if (_luxStats != null)
+                            ListTile(
+                              leading: const Icon(Icons.light_mode),
+                              title: const Text("Estadísticas de luz (lux)"),
+                              subtitle: Text(
+                                "Máx: ${(_luxStats?['max'] as num?)?.toStringAsFixed(3)}\n"
+                                    "Min: ${(_luxStats?['min'] as num?)?.toStringAsFixed(3)}\n"
+                                    "Media: ${(_luxStats?['avg'] as num?)?.toStringAsFixed(3)}\n"
+                                    "Q1: ${(_luxStats?['q1'] as num?)?.toStringAsFixed(3)}\n"
+                                    "Q3: ${(_luxStats?['q3'] as num?)?.toStringAsFixed(3)}",
+                              ),
+                            ),
+                          if (_noiseStats != null)
+                            ListTile(
+                              leading: const Icon(Icons.volume_up),
+                              title: const Text("Estadísticas de ruido (dB)"),
+                              subtitle: Text(
+                                "Máx: ${(_noiseStats?['max'] as num?)?.toStringAsFixed(3)}\n"
+                                    "Min: ${(_noiseStats?['min'] as num?)?.toStringAsFixed(3)}\n"
+                                    "Media: ${(_noiseStats?['avg'] as num?)?.toStringAsFixed(3)}\n"
+                                    "Q1: ${(_noiseStats?['q1'] as num?)?.toStringAsFixed(3)}\n"
+                                    "Q3: ${(_noiseStats?['q3'] as num?)?.toStringAsFixed(3)}",
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  if (_totalDistanceMeters != null)
-                    Text("Distancia total: $_totalDistanceMeters metros"),
-                  Text("Coords. Inicio: $_startLatitude, $_startLongitude, $_startAltitude"),
-                  Text("Coords. Final: $_endLatitude, $_endLongitude, $_endAltitude"),
-                  if (_luxStats != null) ...[
-                    Text("Luz - Max: ${_luxStats?['max']}, Min: ${_luxStats?['min']}, "
-                        "Media: ${_luxStats?['avg']}, Q1: ${_luxStats?['q1']}, Q3: ${_luxStats?['q3']}"),
-                  ],
-                  if (_noiseStats != null) ...[
-                    Text("Ruido - Max: ${_noiseStats?['max']}, Min: ${_noiseStats?['min']}, "
-                        "Media: ${_noiseStats?['avg']}, Q1: ${_noiseStats?['q1']}, Q3: ${_noiseStats?['q3']}"),
-                  ],
+                  ),
                   ElevatedButton(
                     onPressed: _exportToCSV,
                     child: const Text("Exportar a CSV"),
