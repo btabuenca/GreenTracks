@@ -13,6 +13,7 @@ import 'package:csv/csv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'package:latlong2/latlong.dart';
 
 class TrackingScreen extends StatefulWidget {
   const TrackingScreen({super.key});
@@ -54,6 +55,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
   Map<String, dynamic>? _luxStats;
   Map<String, dynamic>? _noiseStats;
+  int? _totalDistanceMeters;
+
 
   @override
   void initState() {
@@ -197,13 +200,16 @@ class _TrackingScreenState extends State<TrackingScreen> {
     }
   }
 
+
   Future<void> _stopTracking() async {
     if (_isTracking) {
       _lightSubscription?.cancel();
       _noiseSubscription?.cancel();
 
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
       setState(() {
         _isTracking = false;
         _endTime = DateTime.now();
@@ -214,8 +220,23 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
       _luxStats = await dbHelper.calculateStatistics("lux");
       _noiseStats = await dbHelper.calculateStatistics("decibel");
+
+      final data = await dbHelper.getTelemetry();
+      double totalDistance = 0.0;
+      final Distance distance = Distance();
+
+      for (int i = 1; i < data.length; i++) {
+        final prev = LatLng(data[i - 1]['latitude'], data[i - 1]['longitude']);
+        final curr = LatLng(data[i]['latitude'], data[i]['longitude']);
+        totalDistance += distance.as(LengthUnit.Meter, prev, curr);
+      }
+
+      setState(() {
+        _totalDistanceMeters = totalDistance.round();
+      });
     }
   }
+
 
   Future<void> _saveTelemetry() async {
     final now = DateTime.now();
@@ -414,6 +435,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     Text(
                       "Duración: ${_formatDuration(_endTime!.difference(_startTime!))}",
                     ),
+                  if (_totalDistanceMeters != null)
+                    Text("Distancia total: $_totalDistanceMeters metros"),
                   Text("Coords. Inicio: $_startLatitude, $_startLongitude, $_startAltitude"),
                   Text("Coords. Final: $_endLatitude, $_endLongitude, $_endAltitude"),
                   if (_luxStats != null) ...[
