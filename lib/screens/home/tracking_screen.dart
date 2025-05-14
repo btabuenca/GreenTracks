@@ -31,6 +31,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   bool getNoise = true;
   final Light _light = Light();
   final NoiseMeter noiseMeter = NoiseMeter();
+  int? _totalSamples;
   StreamSubscription? _lightSubscription;
   StreamSubscription<NoiseReading>? _noiseSubscription;
 
@@ -52,6 +53,11 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
   DateTime? _lastSampleTime;
   int _samplingIntervalSeconds = 1;
+  Timer? _countdownTimer;
+  int _secondsRemaining = 0;
+  double _accumulatedLux = 0.0;
+  double _accumulatedNoise = 0.0;
+  int _sampleCount = 0;
 
 
   final dbHelper = DatabaseHelper();
@@ -66,6 +72,15 @@ class _TrackingScreenState extends State<TrackingScreen> {
     super.initState();
     requestPermissions();
     loadPreferences();
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_isTracking && _secondsRemaining > 0) {
+        setState(() {
+          _secondsRemaining--;
+        });
+      }
+    });
+
   }
 
   Future<void> requestPermissions() async {
@@ -78,7 +93,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
     setState(() {
       getLux = prefs.getBool('getLux') ?? true;
       getNoise = prefs.getBool('getNoise') ?? true;
-      _samplingIntervalSeconds = prefs.getInt('samplingInterval') ?? 1;
     });
   }
 
@@ -155,6 +169,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
   Future<void> _startTracking() async {
     if (!_isTracking) {
+      // ✅ Leer cadencia actual de SharedPreferences al comenzar
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      _samplingIntervalSeconds = prefs.getInt('samplingInterval') ?? 1;
+
       setState(() {
         _isTracking = true;
         _startTime = DateTime.now();
@@ -236,36 +254,55 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
       setState(() {
         _totalDistanceMeters = totalDistance.round();
+        _totalSamples = data.length;
       });
+
     }
   }
 
 
   Future<void> _saveTelemetry() async {
     final now = DateTime.now();
-    if (_lastSampleTime != null &&
-        now.difference(_lastSampleTime!).inSeconds < _samplingIntervalSeconds) {
-      return; // aún no ha pasado el intervalo
+    final elapsed = _lastSampleTime != null
+        ? now.difference(_lastSampleTime!).inSeconds
+        : _samplingIntervalSeconds + 1;
+
+    // Acumula valores si están disponibles
+    if (_luxValue != null) _accumulatedLux += _luxValue!;
+    if (_decibelValue != null) _accumulatedNoise += _decibelValue!;
+    _sampleCount++;
+
+    if (elapsed >= _samplingIntervalSeconds) {
+      _lastSampleTime = now;
+      _secondsRemaining = _samplingIntervalSeconds; // Reinicia la cuenta atrás
+
+      final avgLux = _sampleCount > 0 ? _accumulatedLux / _sampleCount : null;
+      final avgNoise = _sampleCount > 0 ? _accumulatedNoise / _sampleCount : null;
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+        _altitude = position.altitude;
+      });
+
+      await dbHelper.insertTelemetry(
+        avgLux,
+        avgNoise,
+        _latitude,
+        _longitude,
+        _altitude,
+      );
+
+      // 🔁 Reinicia acumuladores
+      _accumulatedLux = 0.0;
+      _accumulatedNoise = 0.0;
+      _sampleCount = 0;
     }
-    _lastSampleTime = now;
-
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    setState(() {
-      _latitude = position.latitude;
-      _longitude = position.longitude;
-      _altitude = position.altitude;
-    });
-
-    await dbHelper.insertTelemetry(
-      _luxValue,
-      _decibelValue,
-      _latitude,
-      _longitude,
-      _altitude,
-    );
   }
-
 
   Future<void> _exportToCSV() async {
     final data = await dbHelper.getTelemetry();
@@ -295,7 +332,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       // Comparte el archivo CSV
       await Share.shareXFiles(
         [XFile(file.path)],
-        text: "Adjunto CSV de telemetría generado desde MadTrack.",
+        text: "Adjunto CSV de telemetrías generado desde GreenTrackS.",
         subject: "GreenTrackS dataset",
       );
     } catch (e) {
@@ -390,32 +427,56 @@ class _TrackingScreenState extends State<TrackingScreen> {
           ),
           const SizedBox(height: 20),
           if (_isTracking)
-            Center(
+            Align(
+              alignment: Alignment.centerLeft,
               child: Column(
                 children: [
                   if (_luxValue != null)
-                    Text(
-                      'Luz: ${_luxValue?.toStringAsFixed(1)} lux',
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: _getLuxColor(_luxValue!),
-                      ),
+                    Row(
+                      children: [
+                        const Icon(Icons.light_mode),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Luz: ${_luxValue?.toStringAsFixed(1)} lux',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: _getLuxColor(_luxValue!),
+                          ),
+                        ),
+                      ],
                     ),
                   if (_decibelValue != null)
-                    Text(
-                      'Ruido: ${_decibelValue?.toStringAsFixed(1)} dB',
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: _getNoiseColor(_decibelValue!),
-                      ),
+                    Row(
+                      children: [
+                        const Icon(Icons.volume_up),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Ruido: ${_decibelValue?.toStringAsFixed(1)} db',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: _getLuxColor(_decibelValue!),
+                          ),
+                        ),
+                      ],
                     ),
                   if (_latitude != null && _longitude != null && _altitude != null)
-                    Text(
-                      'Coordenadas: ${_latitude?.toStringAsFixed(5)}, ${_longitude?.toStringAsFixed(5)} , ${_altitude?.toStringAsFixed(5)}',
-                      style: const TextStyle(fontSize: 20),
+                    Row(
+                      children: [
+                        const Icon(Icons.flag, size: 16),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Lat ${_latitude?.toStringAsFixed(5)}\nLon ${_longitude?.toStringAsFixed(5)}\nAlt ${_altitude?.toStringAsFixed(5)}',
+                          style: const TextStyle(fontSize: 10),
+                        ),
+                      ],
                     ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Cadencia de lectura $_samplingIntervalSeconds s. Próxima lectura en: $_secondsRemaining s',
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
                 ],
               ),
             ),
@@ -436,6 +497,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
                         children: [
                           const Text("Resumen", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 12),
+                          if (_totalSamples != null)
+                            ListTile(
+                              leading: const Icon(Icons.format_list_numbered),
+                              title: const Text("Número de muestras"),
+                              subtitle: Text("$_totalSamples en este intervalo"),
+                            ),
                           if (_startTime != null)
                             ListTile(
                               leading: const Icon(Icons.play_arrow),
@@ -454,24 +521,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
                               title: const Text("Distancia total recorrida"),
                               subtitle: Text("$_totalDistanceMeters metros"),
                             ),
-                          ListTile(
-                            leading: const Icon(Icons.flag),
-                            title: const Text("Coordenadas de inicio"),
-                            subtitle: Text(
-                              "Latitud: ${_startLatitude?.toStringAsFixed(3)}\n"
-                                  "Longitud: ${_startLongitude?.toStringAsFixed(3)}\n"
-                                  "Altitud: ${_startAltitude?.toStringAsFixed(3)} m",
-                            ),
-                          ),
-                          ListTile(
-                            leading: const Icon(Icons.outlined_flag),
-                            title: const Text("Coordenadas finales"),
-                            subtitle: Text(
-                              "Latitud: ${_endLatitude?.toStringAsFixed(3)}\n"
-                                  "Longitud: ${_endLongitude?.toStringAsFixed(3)}\n"
-                                  "Altitud: ${_endAltitude?.toStringAsFixed(3)} m",
-                            ),
-                          ),
                           if (_luxStats != null)
                             ListTile(
                               leading: const Icon(Icons.light_mode),
@@ -500,18 +549,42 @@ class _TrackingScreenState extends State<TrackingScreen> {
                       ),
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: _exportToCSV,
-                    child: const Text("Exportar a CSV"),
-                  ),
-                  ElevatedButton(
-                    onPressed: _sendJsonToWebService,
-                    child: const Text("Enviar JSON al Web Service"),
-                  ),
-                  ElevatedButton(
-                    onPressed: _resetDatabase,
-                    child: const Text("Resetear Base de Datos"),
-                  ),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _sendJsonToWebService,
+                        icon: const Icon(Icons.cloud_upload),
+                        label: const Text("Share to Dashboard"),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                          backgroundColor: Colors.teal,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _exportToCSV,
+                        icon: const Icon(Icons.share),
+                        label: const Text("Share CSV"),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                          backgroundColor: Colors.indigo,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: _resetDatabase,
+                        icon: const Icon(Icons.delete_forever),
+                        label: const Text("Reset Data"),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                          backgroundColor: Colors.redAccent,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -530,6 +603,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   void dispose() {
     _lightSubscription?.cancel();
     _noiseSubscription?.cancel();
+    _countdownTimer?.cancel();
     super.dispose();
   }
 }
