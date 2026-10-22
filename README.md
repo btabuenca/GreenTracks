@@ -191,9 +191,4 @@ Research areas:
 
 ## 📄 License
 
-This repository is released for educational and research purposes (CC BY-NC 4.0).
-
-Please contact the authors before commercial use.
-This repository is released for educational and research purposes.
-
-Please contact the authors before commercial use.
+This repository is released for educational and research purposes (under open license CC BY-NC 4.0). Please contact the authors before commercial use.
