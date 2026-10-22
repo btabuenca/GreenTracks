@@ -152,6 +152,18 @@ android/
 
 ---
 
+## 📊 Public Environmental Dashboard
+
+GreenTracks measurements can be explored through a public Grafana dashboard that aggregates environmental observations collected by users.
+
+👉 **Open Dashboard**
+
+https://short.upm.es/xrrrv 
+
+The dashboard includes noise, illuminance, air quality, weather conditions and geolocated environmental observations contributed through the GreenTracks mobile application.
+
+---
+
 ## 🔬 Research & Publications
 
 This application has supported research activities in:
