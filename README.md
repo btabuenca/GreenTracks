@@ -76,4 +76,134 @@ The platform encourages learners to investigate real-world environmental phenome
 
 ## 🏛 Project Context
 
-GreenTracks has been developed within
+GreenTracks has been developed within:
+
+**SUTEE – Sustainable Technologies for Environmental Education**
+
+Erasmus+ Programme
+
+Project Reference:
+
+**2023-1-ES01-KA220-SCH-000153498**
+
+---
+
+## 🛠 Technology Stack
+
+- Flutter
+- Dart
+- Firebase
+- Android SDK
+- REST APIs
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Flutter SDK
+- Android Studio or VS Code
+- Android Emulator or Physical Device
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/btabuenca/GreenTracks.git
+```
+
+Navigate to the project:
+
+```bash
+cd GreenTracks
+```
+
+Install dependencies:
+
+```bash
+flutter pub get
+```
+
+Run the application:
+
+```bash
+flutter run
+```
+
+---
+
+## 📂 Project Structure
+
+```text
+lib/
+├── screens/
+├── widgets/
+├── models/
+├── services/
+├── providers/
+└── main.dart
+
+assets/
+test/
+android/
+```
+
+---
+
+## 📸 Screenshots
+
+Add screenshots here:
+
+| Home | Environmental Data | Statistics |
+|------|------|------|
+| ![Home](docs/home.png) | ![Data](docs/data.png) | ![Stats](docs/stats.png) |
+
+---
+
+## 🔬 Research & Publications
+
+This application has supported research activities in:
+
+- Environmental Learning
+- Internet of Things (IoT)
+- Sustainability Education
+- Mobile Learning
+- Citizen Science
+
+Associated scientific publications can be found in the project's dissemination outputs.
+
+---
+
+## 🌍 Links
+
+- SUTEE Project: https://sutee.eu
+- Universidad Politécnica de Madrid: https://www.upm.es
+- Flutter: https://flutter.dev
+
+---
+
+## 👨‍💻 Author
+
+**Bernardo Tabuenca Archilla**
+
+Universidad Politécnica de Madrid (UPM)
+
+Research areas:
+
+- Technology Enhanced Learning
+- Environmental Education
+- IoT for Learning
+- Sustainability and Citizen Science
+
+---
+
+## 📄 License
+
+This repository is released for educational and research purposes (CC BY-NC 4.0).
+
+Please contact the authors before commercial use.
+This repository is released for educational and research purposes.
+
+Please contact the authors before commercial use.
