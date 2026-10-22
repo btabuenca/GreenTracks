@@ -152,16 +152,6 @@ android/
 
 ---
 
-## 📸 Screenshots
-
-Add screenshots here:
-
-| Home | Environmental Data | Statistics |
-|------|------|------|
-| ![Home](docs/home.png) | ![Data](docs/data.png) | ![Stats](docs/stats.png) |
-
----
-
 ## 🔬 Research & Publications
 
 This application has supported research activities in:
